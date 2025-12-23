@@ -1,26 +1,29 @@
 // src/components/SuccessToast.tsx
 
-import { Button, Toast, ToastBody } from "reactstrap"
-
 const SuccessToast = (props: {
   toastIsOpen: boolean
   setToastIsOpen: (isOpen: boolean) => void
 }) => {
+  if (!props.toastIsOpen) return null
+
   return (
-    <Toast
-      className="bg-success text-white fixed-bottom ms-auto me-4 mb-4"
-      isOpen={props.toastIsOpen}
-      fade
+    <div
+      className="position-fixed bottom-0 end-0 m-4 p-3 bg-success text-white rounded shadow"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      style={{ zIndex: 1080, minWidth: '20rem' }}
     >
-      <ToastBody className="d-flex justify-content-between">
-        Produto adicionado ao carrinho.
-        <Button
-          close
-          className="btn-close-white"
+      <div className="d-flex justify-content-between align-items-center">
+        <span>Produto adicionado ao carrinho.</span>
+        <button
+          type="button"
+          className="btn-close btn-close-white"
+          aria-label="Fechar"
           onClick={() => props.setToastIsOpen(false)}
-        ></Button>
-      </ToastBody>
-    </Toast>
+        />
+      </div>
+    </div>
   )
 }
 

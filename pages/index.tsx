@@ -1,12 +1,39 @@
 // pages/index.tsx
 
-import { NextPage } from "next"
-import Head from "next/head"
-import Link from "next/link"
-import { Button, Container } from "reactstrap"
+import { GetStaticProps, NextPage } from "next";
+import Head from "next/head";
+import Link from "next/link";
+import { Button, Col, Container, Row } from "reactstrap";
 import Header from "../src/components/Header";
+import { fetchProducts, ProductType } from "../src/services/products";
+import ProductCard from "../src/components/ProductCard";
+import { useEffect, useMemo, useState } from "react";
 
-const Home: NextPage = () => {
+export const getStaticProps: GetStaticProps = async () => {
+  const products = await fetchProducts();
+  return { props: { products } };
+};
+
+const Home: NextPage = (props: { products?: ProductType[] }) => {
+  const slides = useMemo(() => {
+    const list = props.products ?? [];
+    const size = 4;
+    const chunks: ProductType[][] = [];
+    for (let i = 0; i < list.length; i += size) {
+      chunks.push(list.slice(i, i + size));
+    }
+    return chunks;
+  }, [props.products]);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const id = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % slides.length);
+    }, 3000);
+    return () => clearInterval(id);
+  }, [slides.length]);
+
   return (
     <>
       <Head>
@@ -17,23 +44,41 @@ const Home: NextPage = () => {
 
       <Header />
 
-      <main >
+      <main>
         <Container className="py-5 text-center">
           <h1 className="mt-5 display-1">
             O melhor jeito de comprar o que você ama
           </h1>
           <p className="my-4">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae iusto voluptatem obcaecati omnis error architecto neque cum exercitationem fugiat. Vero illo autem eum nisi sapiente, odio optio accusamus cupiditate ad.
+            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae
+            iusto voluptatem obcaecati omnis error architecto neque cum
+            exercitationem fugiat. Vero illo autem eum nisi sapiente, odio optio
+            accusamus cupiditate ad.
           </p>
+        </Container>
+
+        <Container className="mb-5">
+          {slides.length > 0 && (
+            <Row className="g-4">
+              {slides[activeIndex].map((product) => (
+                <Col md={6} lg={3} key={product.id}>
+                  <ProductCard product={product} />
+                </Col>
+              ))}
+            </Row>
+          )}
+        </Container>
+
+        <Container className="text-center pb-5">
           <Link href="/products">
             <Button color="dark" className="px-4 pb-2">
-              Conheça nossos produtos!
+              Conheça mais dos nossos produtos!
             </Button>
           </Link>
         </Container>
       </main>
     </>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
